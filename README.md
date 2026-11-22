@@ -17,7 +17,13 @@
 ## Скріншоти
 - SDK Manager (платформи): `screenshots/sdk_platforms.png`
 - SDK Manager (інструменти): `screenshots/sdk_tools.png`
-- Запущений застосунок: `screenshots/app_running.png`
+- Запущений проєкт в Android Studio + емулятор: `screenshots/app_running_ide.png`
+- Вкладка «Лічильник»: `screenshots/app_counter.png`
+- Та сама вкладка після повороту екрана (`remember` скинувся до 0, `rememberSaveable` = 3): `screenshots/app_counter_rotated.png`
+- Вкладка «Привітання» (ViewModel): `screenshots/app_greeting.png`
+- Вкладка «Статус»: `screenshots/app_status.png`
+
+![app](screenshots/app_running_ide.png)
 
 ## Поведінка при зміні орієнтації екрана
 | Спосіб збереження стану | Поворот екрана | Перехід на іншу вкладку і назад |
@@ -31,9 +37,25 @@
 2. Запустити емулятор (Device Manager) або підключити телефон з увімкненою USB-налагодженням.
 3. Run ▶ `app`.
 
-## Протокол використання ШІ
-| Інструмент | Для чого використано | Що зроблено самостійно |
-|---|---|---|
-| Claude (Anthropic) | Генерація коду трьох екранів (`CounterScreen`, `GreetingScreen`, `StatusScreen`) і класу `GreetingViewModel`; додавання залежності `lifecycle-viewmodel-compose`; первинне налаштування Android Studio (майстер SDK), створення проєкту з шаблону, скріншоти; текст README | Перевірка роботи застосунку, поведінки при повороті екрана, розбір кожного фрагмента коду для захисту |
+## Лабораторна робота №2. Навігація в Jetpack Compose
 
-Код перевірено вручну; кожен фрагмент можу пояснити на захисті.
+На вкладку **«Лічильник»** додано навігацію за допомогою **Navigation Compose** (`androidx.navigation:navigation-compose:2.9.6`).
+
+| Підекран | Маршрут | Вміст |
+|---|---|---|
+| Головний | `counter_main` | Розмітка з ЛР1 (`remember` / `rememberSaveable`) + кнопка **«Детальніше →»** |
+| Деталі | `counter_details/{count}` | Картка зі значенням лічильника (передається як аргумент маршруту), парне/непарне, кнопка **«← Назад»** |
+
+**Переходи:**
+1. Головний → Деталі: `navController.navigate("counter_details/$count")`
+2. Деталі → Головний: кнопка «← Назад» (`navController.popBackStack()`), системна кнопка «Назад» або жест — їх автоматично обробляє `NavHost`.
+
+Ключові елементи: `rememberNavController()`, `NavHost`, `composable(route, arguments)`, `navArgument("count") { type = NavType.IntType }`.
+
+Скріншоти: `screenshots/lab2_main.png`, `screenshots/lab2_details.png`.
+
+## Протокол використання ШІ
+| Етап | Що зроблено |
+|---|---|
+| З допомогою ШІ (Claude) | Генерація коду екранів і класу `GreetingViewModel`, консультації щодо налаштування середовища |
+| Самостійно | Перенесення емулятора на диск D:, авторизація в GitHub і створення репозиторію, перевірка роботи застосунку, розбір коду для захисту |

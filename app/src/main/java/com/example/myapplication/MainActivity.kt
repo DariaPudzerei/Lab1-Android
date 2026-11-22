@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,12 +17,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -40,6 +43,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.myapplication.ui.theme.MyApplicationTheme
 
 class MainActivity : ComponentActivity() {
@@ -80,7 +88,7 @@ fun MyApplicationApp() {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
             val screenModifier = Modifier.padding(innerPadding)
             when (currentDestination) {
-                AppDestinations.COUNTER -> CounterScreen(screenModifier)
+                AppDestinations.COUNTER -> CounterNavHost(screenModifier)   // ЛР2: навігація всередині вкладки
                 AppDestinations.GREETING -> GreetingScreen(screenModifier)
                 AppDestinations.STATUS -> StatusScreen(screenModifier)
             }
@@ -88,7 +96,7 @@ fun MyApplicationApp() {
     }
 }
 
-// Власні елементи навігації (завдання 5)
+// Власні елементи навігації (ЛР1, завдання 5)
 enum class AppDestinations(
     val label: String,
     val icon: Int,
@@ -98,9 +106,51 @@ enum class AppDestinations(
     STATUS("Статус", R.drawable.ic_account_box),
 }
 
-/* ---------- Екран 1: remember vs rememberSaveable (по центру) ---------- */
+/* ===================== ЛР2: навігація в межах вкладки «Лічильник» ===================== */
+
+// Маршрути підекранів
+object CounterRoutes {
+    const val MAIN = "counter_main"
+    const val DETAILS = "counter_details/{count}"
+    fun details(count: Int) = "counter_details/$count"
+}
+
 @Composable
-fun CounterScreen(modifier: Modifier = Modifier) {
+fun CounterNavHost(modifier: Modifier = Modifier) {
+    // NavController зберігає back stack підекранів і обробляє системну кнопку/жест «Назад»
+    val navController = rememberNavController()
+
+    NavHost(
+        navController = navController,
+        startDestination = CounterRoutes.MAIN,
+        modifier = modifier
+    ) {
+        // Підекран 1: розмітка з ЛР1 + кнопка переходу
+        composable(CounterRoutes.MAIN) {
+            CounterScreen(
+                onOpenDetails = { count -> navController.navigate(CounterRoutes.details(count)) }
+            )
+        }
+        // Підекран 2: довільна розмітка, отримує аргумент count
+        composable(
+            route = CounterRoutes.DETAILS,
+            arguments = listOf(navArgument("count") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val count = backStackEntry.arguments?.getInt("count") ?: 0
+            CounterDetailsScreen(
+                count = count,
+                onBack = { navController.popBackStack() }
+            )
+        }
+    }
+}
+
+/* ---------- Підекран 1: remember vs rememberSaveable (по центру) ---------- */
+@Composable
+fun CounterScreen(
+    modifier: Modifier = Modifier,
+    onOpenDetails: (Int) -> Unit = {}
+) {
     var countRemember by remember { mutableIntStateOf(0) }          // скидається при повороті
     var countSaveable by rememberSaveable { mutableIntStateOf(0) }  // зберігається при повороті
 
@@ -127,6 +177,59 @@ fun CounterScreen(modifier: Modifier = Modifier) {
         ) {
             Text("Натисни +1")
         }
+        Spacer(Modifier.height(12.dp))
+        // ЛР2: кнопка переходу на другий підекран
+        OutlinedButton(
+            onClick = { onOpenDetails(countSaveable) },
+            modifier = Modifier.width(220.dp)
+        ) {
+            Text("Детальніше →")
+        }
+    }
+}
+
+/* ---------- Підекран 2: деталі лічильника (довільна розмітка) ---------- */
+@Composable
+fun CounterDetailsScreen(
+    count: Int,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            TextButton(onClick = onBack) { Text("← Назад") }
+            Text(text = "Деталі", fontSize = 22.sp, fontWeight = FontWeight.Bold)
+        }
+        Spacer(Modifier.height(16.dp))
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(20.dp)) {
+                Text("Значення лічильника", fontSize = 16.sp)
+                Text(
+                    text = "$count",
+                    fontSize = 56.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = when {
+                        count == 0 -> "Ви ще не натискали кнопку"
+                        count % 2 == 0 -> "Число парне"
+                        else -> "Число непарне"
+                    },
+                    fontSize = 16.sp
+                )
+            }
+        }
+        Spacer(Modifier.height(16.dp))
+        Text(
+            text = "Повернутися можна кнопкою «Назад» угорі, системною кнопкою або жестом.",
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
