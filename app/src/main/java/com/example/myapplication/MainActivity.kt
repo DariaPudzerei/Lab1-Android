@@ -92,6 +92,7 @@ fun MyApplicationApp() {
                 AppDestinations.COUNTER -> CounterNavHost(screenModifier)   // ЛР2: навігація всередині вкладки
                 AppDestinations.GREETING -> GreetingScreen(screenModifier)
                 AppDestinations.STATUS -> StatusScreen(screenModifier)
+                AppDestinations.DATABASE -> DatabaseScreen(screenModifier)   // ЛР4: Room
             }
         }
     }
@@ -105,6 +106,7 @@ enum class AppDestinations(
     COUNTER("Лічильник", R.drawable.ic_home),
     GREETING("Привітання", R.drawable.ic_favorite),
     STATUS("Статус", R.drawable.ic_account_box),
+    DATABASE("База", R.drawable.ic_storage),            // ЛР4
 }
 
 /* ===================== ЛР2: навігація в межах вкладки «Лічильник» ===================== */

@@ -72,6 +72,29 @@
 
 Усі моделі реалізують `sealed interface FeedItem`, тому зберігаються в одному списку; розмітка вибирається через `when (item) { is Contact -> … }`. Для елементів задано `key = { it.id }` і `contentType = { it::class }`.
 
+| Початок списку | Прокручений список (галерея гортається вбік) |
+|---|---|
+| ![list](screenshots/lab3_list.png) | ![scrolled](screenshots/lab3_scrolled.png) |
+
+## Лабораторна робота №4. Локальна БД з Room
+
+Додано нову вкладку **«База»** з локальною базою даних SQLite через **Room 3** (`androidx.room3:room3-runtime:3.0.3`, KSP, драйвер `AndroidSQLiteDriver`).
+
+**Таблиці:**
+
+| Таблиця | Поля | Зв'язок |
+|---|---|---|
+| `contact_groups` | `id` (PK, autoincrement), `title` | батьківська |
+| `contacts` | `id` (PK), `groupId` (FK, індекс), `name`, `role`, `isOnline` | `groupId → contact_groups.id`, **ON DELETE CASCADE**, **ON UPDATE CASCADE** |
+
+**Операції:** додавання (`@Insert`) — кнопки «+ Група» та «+» у групі; зміна (`@Update`) — «✎» та натискання на контакт (статус у мережі); видалення (`@Delete`) — «✕» (видалення групи каскадно видаляє її контакти).
+
+**Архітектура:** `AppDatabase` → `ContactsDao` (`Flow` для читання, `suspend` для запису) → `ContactsDbRepository` → `DbViewModel` (об'єднує обидві таблиці через `combine`) → `DatabaseScreen` (спільний `LazyColumn`: група, під нею її контакти).
+
+| Спільний список | Редагування | Нова група |
+|---|---|---|
+| ![list](screenshots/lab4_list.png) | ![edit](screenshots/lab4_edit.png) | ![new](screenshots/lab4_new_group.png) |
+
 ## Протокол використання ШІ
 | Етап | Що зроблено |
 |---|---|
