@@ -52,7 +52,25 @@
 
 Ключові елементи: `rememberNavController()`, `NavHost`, `composable(route, arguments)`, `navArgument("count") { type = NavType.IntType }`.
 
-Скріншоти: `screenshots/lab2_main.png`, `screenshots/lab2_details.png`.
+Після повернення з «Деталей» значення `remember` скидається (підекран виходив із композиції), а `rememberSaveable` зберігається — NavHost відновлює збережений стан запису back stack.
+
+| Головний підекран | Деталі |
+|---|---|
+| ![main](screenshots/lab2_main.png) | ![details](screenshots/lab2_details.png) |
+
+## Лабораторна робота №3. Список з використанням LazyColumn
+
+На вкладку **«Привітання»** під привітанням і кнопкою додано список `LazyColumn`, що займає весь вільний простір, який залишився (`Modifier.weight(1f)`).
+
+**Архітектура:** `FeedRepository` (тестові дані) → `FeedViewModel` → `FeedList` (UI).
+
+| Модель (`data/FeedModels.kt`) | Розмітка (`FeedList.kt`) | Вигляд |
+|---|---|---|
+| `Contact(name, role, isOnline)` | `ContactRow` | Аватар з літерою, ім'я, роль, індикатор статусу |
+| `Note(title, text, date)` | `NoteCard` | Картка з заголовком, текстом і датою |
+| `Gallery(title, colors)` | `GalleryRow` | **Горизонтальний `LazyRow` усередині `LazyColumn`** (додаткове завдання) |
+
+Усі моделі реалізують `sealed interface FeedItem`, тому зберігаються в одному списку; розмітка вибирається через `when (item) { is Contact -> … }`. Для елементів задано `key = { it.id }` і `contentType = { it::class }`.
 
 ## Протокол використання ШІ
 | Етап | Що зроблено |

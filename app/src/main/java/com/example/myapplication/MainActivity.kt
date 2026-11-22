@@ -48,6 +48,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.myapplication.data.FeedViewModel
 import com.example.myapplication.ui.theme.MyApplicationTheme
 
 class MainActivity : ComponentActivity() {
@@ -253,12 +254,14 @@ class GreetingViewModel : ViewModel() {
 @Composable
 fun GreetingScreen(
     modifier: Modifier = Modifier,
-    vm: GreetingViewModel = viewModel()
+    vm: GreetingViewModel = viewModel(),
+    feedVm: FeedViewModel = viewModel()   // ЛР3: дані для списку
 ) {
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .padding(horizontal = 24.dp)
+            .padding(top = 24.dp),
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Top
     ) {
@@ -268,6 +271,15 @@ fun GreetingScreen(
         OutlinedButton(onClick = { vm.next() }, modifier = Modifier.fillMaxWidth()) {
             Text("Змінити привітання")
         }
+        Spacer(Modifier.height(16.dp))
+        Text(text = "Стрічка", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+        // ЛР3: список займає весь вільний простір, що залишився (weight = 1f)
+        FeedList(
+            items = feedVm.items,
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+        )
     }
 }
 
