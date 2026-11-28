@@ -95,6 +95,18 @@
 |---|---|---|
 | ![list](screenshots/lab4_list.png) | ![edit](screenshots/lab4_edit.png) | ![new](screenshots/lab4_new_group.png) |
 
+## Лабораторна робота №5. Взаємодія із зовнішнім API
+
+На вкладці **«База»** додано завантаження даних у форматі JSON із зовнішнього API за допомогою **Retrofit 3** + **Gson**.
+
+- **API:** `GET https://jsonplaceholder.typicode.com/users` — 10 користувачів у JSON.
+- **Retrofit:** `api/RetrofitClient.kt` (базова адреса, `GsonConverterFactory`), `api/UsersApi.kt` (`@GET("users") suspend fun getUsers(): Response<List<UserDto>>`), `api/UserDto.kt` (DTO з `@SerializedName` і перетворення `toEntity()`).
+- **Збереження в БД:** `ContactsDbRepository.importFromApi()` створює групу «API: JSONPlaceholder» і пакетно вставляє контакти (`@Insert insertContacts`). Перед повторним завантаженням стара група видаляється — її контакти зникають каскадно (`ON DELETE CASCADE`), тому дублікатів немає.
+- **Відображення:** дані з API показуються в спільному списку разом з іншими записами БД; стан завантаження (`ApiState`: Loading / Success / Error) — під кнопкою.
+- У `AndroidManifest.xml` додано дозвіл `android.permission.INTERNET`.
+
+![api](screenshots/lab5_api.png)
+
 ## Протокол використання ШІ
 | Етап | Що зроблено |
 |---|---|

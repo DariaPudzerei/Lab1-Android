@@ -3,8 +3,10 @@ package com.example.myapplication.db
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -20,6 +22,14 @@ sealed interface DbListItem {
     data class ContactRow(val contact: ContactEntity) : DbListItem {
         override val key = "c${contact.id}"
     }
+}
+
+/** ЛР5: стан завантаження з API */
+sealed interface ApiState {
+    data object Idle : ApiState
+    data object Loading : ApiState
+    data class Success(val count: Int) : ApiState
+    data class Error(val message: String) : ApiState
 }
 
 /**
@@ -57,4 +67,17 @@ class DbViewModel(application: Application) : AndroidViewModel(application) {
     fun toggleOnline(contact: ContactEntity) =
         viewModelScope.launch { repository.updateContact(contact.copy(isOnline = !contact.isOnline)) }
     fun deleteContact(contact: ContactEntity) = viewModelScope.launch { repository.deleteContact(contact) }
+
+    // ---------- ЛР5: API ----------
+    private val _apiState = MutableStateFlow<ApiState>(ApiState.Idle)
+    val apiState: StateFlow<ApiState> = _apiState.asStateFlow()
+
+    fun loadFromApi() = viewModelScope.launch {
+        _apiState.value = ApiState.Loading
+        _apiState.value = try {
+            ApiState.Success(repository.importFromApi())
+        } catch (e: Exception) {
+            ApiState.Error(e.message ?: "Немає з'єднання з мережею")
+        }
+    }
 }

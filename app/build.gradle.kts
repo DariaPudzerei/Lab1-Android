@@ -53,6 +53,9 @@ dependencies {
     implementation(libs.androidx.room3.runtime)
     implementation(libs.androidx.sqlite.framework)
     ksp(libs.androidx.room3.compiler)
+    // ЛР5: Retrofit + Gson для завантаження JSON з API
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.gson)
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)

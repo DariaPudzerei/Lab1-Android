@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -39,6 +40,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.myapplication.db.ApiState
 import com.example.myapplication.db.ContactEntity
 import com.example.myapplication.db.DbListItem
 import com.example.myapplication.db.DbViewModel
@@ -60,6 +62,7 @@ fun DatabaseScreen(
     vm: DbViewModel = viewModel()
 ) {
     val items by vm.items.collectAsState()
+    val apiState by vm.apiState.collectAsState()          // ЛР5
     var dialog by remember { mutableStateOf<DbDialog?>(null) }
 
     Column(
@@ -80,6 +83,26 @@ fun DatabaseScreen(
             Button(onClick = { dialog = DbDialog.NewGroup }) { Text("+ Група") }
         }
         Spacer(Modifier.height(8.dp))
+
+        // ЛР5: завантаження даних з зовнішнього API
+        OutlinedButton(
+            onClick = { vm.loadFromApi() },
+            enabled = apiState !is ApiState.Loading,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(if (apiState is ApiState.Loading) "Завантаження…" else "⇣ Завантажити користувачів з API")
+        }
+        when (val s = apiState) {
+            is ApiState.Success -> Text(
+                "Отримано та збережено в БД: ${s.count} записів",
+                fontSize = 13.sp, color = Color(0xFF2E7D32)
+            )
+            is ApiState.Error -> Text(
+                "Помилка завантаження: ${s.message}",
+                fontSize = 13.sp, color = MaterialTheme.colorScheme.error
+            )
+            else -> Unit
+        }
 
         // Спільний список: записи з обох таблиць
         LazyColumn(

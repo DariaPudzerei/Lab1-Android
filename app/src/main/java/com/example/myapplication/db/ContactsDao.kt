@@ -22,6 +22,9 @@ interface ContactsDao {
     @Query("SELECT COUNT(*) FROM contact_groups")
     suspend fun countGroups(): Int
 
+    @Query("SELECT * FROM contact_groups WHERE title = :title LIMIT 1")
+    suspend fun findGroupByTitle(title: String): GroupEntity?
+
     @Insert
     suspend fun insertGroup(group: GroupEntity): Long
 
@@ -37,6 +40,10 @@ interface ContactsDao {
 
     @Insert
     suspend fun insertContact(contact: ContactEntity): Long
+
+    /** ЛР5: пакетна вставка контактів, отриманих з API */
+    @Insert
+    suspend fun insertContacts(contacts: List<ContactEntity>)
 
     @Update
     suspend fun updateContact(contact: ContactEntity)
